@@ -1,81 +1,74 @@
-Chiricu Miruna
-332CB
 
-			Tema 2 - LFA
-			
 
-	Folosim conversia NFA->DFA prezentata la curs:
+3411/5000
+We use the NFA-> DFA conversion presented in the course.
 
-- Considerand ca toate comentariile din cod sunt suficiente pentru a intelege
-fiecare functie si cum functioneaza ansamblul, aici voi descrie foarte pe larg
-ideea de implementare, deci modul in care se face conversia: 
+~ state_matrix ~
 
-	~ state_matrix ~
-	
-	Deoarece starile din DFA pot corespunde mai multor stari din NFA
-(pentru ca in NFA pe acelasi simbol, putem pleca pe mai multe drumuri +
-tranzitiile pe epsilon), am decis sa creez o matrice a 
-starilor in DFA:	
-	- matricea este o lista compusa din liste sortate (pentru a nu
-le repeta) de stari ale NFA-ului
-	- fiecare lista reprezinta o stare a DFA-ului compusa din una sau
-mai multe stari ale NFA-ului. Index-ul fiecarei liste va fi numele/numarul
-starii din DFA
-	Ex: [[0], [0, 1, 2], [0, 2], [1, 2]...] -> [0, 1, 2, 3...]
-	
-		
-	~ find_next_state ~
-			
-	Incepand cu starea 0 (vom crea din ce in ce mai multe stari pe masura
-ce se avanseaza in for), pentru fiecare simbol din alfabet, cautam toate 
-starile urmatoare valide (deci dintr-o stare compusa, ne ducem pe toate starile
-partiale), incluzand toate tranzitiile pe epsilon). Facem un BFS conditionat
-pentru toate posibilele stari pornind din starea curenta. Astfel vom avea o
-coada si un set de stari vizitate. Un element din coada va fi un tuplu care 
-arata astfel:
-	(stare_partiala_curenta, simbol_cautat, e_necesar_sa_mai_caut_simbolul?)
-	Ex: (1, 'b', True)
-	A treia componenta a tuplului imi indica daca mai e necesar sa caut
-o tranzitie pe simbol in continuare (daca l-am gasit o data pe calea curenta,
-nu am voie decat sa caut tranzitii pe epsilon in continuare). Daca nu am gasit
-inca simbolul pe calea curenta, pot sa ma duc atat pe tranzitii pe epsilon,
-cat si pe simbol.
-	Se vor diferentia in visited tuplurile care au primele doua elemente
-comune si pe al treilea diferit (daca ajung in aceeasi stare, o data cautand
-simbolul, alta data nu, inseamna ca sunt cel putin doua cai pe care am ajuns
-in acea stare, deci va fi util sa caut mai departe pentru ambele.
-	Se considera valide (si le adaugam la setul de stari urmatoare pentru
-simbolul curent) starile ce fac parte din tuplurile pentru care deja am gasit
-simbolul pe calea curenta (a treia componenta este False).
+Because DFA states can correspond to multiple NFA states
+(NFA: on the same symbol we can go on several paths +
+transitions on epsilon), I decided to create a matrix of
+states for the DFA:
+- the matrix is a list composed of sorted lists (as not to
+be repeated) of NFA states
+- each list represents a state of the DFA composed of one or
+several NFA states. The index of each list will be the name
+of the states of the DFA
+Ex: [[0], [0, 1, 2], [0, 2], [1, 2] ...] -> [0, 1, 2, 3 ...]
 
-	Dupa cum am explicat mai devreme, se va forma un set cu urmatoarele
-stari partiale valide pentru fiecare stare compusa, formand o alta stare 
-compusa (pe care o adaugam in matricea starilor daca nu exista deja).
-	Ex: Suntem in starea 012 si avem simbolul 'b'
-	Apelam functia find_next_state pentru 0, 1, 2 separat. Fiecare va
-returna un set (vid sau nu) de stari urmatoare valide. Din cele 3 seturi
-se va forma setul final care va face parte din matricea starilor.
-	Din absenta tranzitiior in delta NFA-ului, s-ar putea ca si acest
-set final sa fie vid. Atunci tranzitia va duce intr-un sink_state.
 
-	~ sink_state ~
-	
-	Dupa ce parcurgem toate starile, daca stim ca exista macar o tranzitie
-pe sink_state, adaugam aceasta stare la starile curente (va fi ultima din
-matrice, deci starea cu numarul cel mai mare) si facem modificarile necesare
+~ find_next_state ~
+
+Starting with state 0 (we will create more and more states according
+to the paths we take), for each symbol in the alphabet, we look for all
+the following valid states (so for a compound state, we go to all the
+states that form it, including all transitions on epsilon). We do a conditioned BFS
+for all possible states starting from the current state. So we will have a
+queue and a set of visited states. An element in the queue will be a tuple that
+looks like this:
+(Current_partial_state, symbol, is_it_necessary_to_look_for_the_symbol?)
+Ex: (1, 'b', True)
+
+The third component of the tuple tells me if I still need to search
+for the symbol further (if I found it once on the current path,
+I am only allowed to look for transitions on epsilon further). If I haven't found
+the symbol on the current path, I can go both on transitions on epsilon,
+as well as on the symbol.
+
+The tuples that have the same first two elements and the third is different
+(if in the same state, we are seeking the symbol in one tuple and not seeking it
+in another tuple, it means that there are at least two paths that have lead to
+that state, so it will be useful to search further for both tuples.
+
+States are considered valid (and we add them to the following set of states for the
+current symbol) if they are part of the tuples for which we have already found
+the symbol on the current path (the third component is False).
+
+As I explained earlier, a set will be formed with the following
+valid partial states for each compound state, forming another compound
+state (which we add to the state matrix if it does not already exist).
+
+Ex: We are in state 012 and we have the symbol 'b'
+We call the find_next_state function for 0, 1, 2 separately. Every call will
+return a set (empty or not) of the following valid states. The final set
+will be formed from the 3 sets and will be part of the state matrix.
+In the absence of relevant transitions in the NFA delta, the final set could be empty.
+Then the transition will lead to a sink_state.
+
+~ sink_state ~
+
+After going through all the states, if we know that there is at least one transition
+that leads to a sink_state, we add this state to the current states (it will be the last
+line of the matrix, so the state with the largest number) and we make the necessary changes
 in delta.
-	
-	~ final_states ~
-	
-	Starile finale vor fi stari din matricea starilor care contin cel
-putin o stare finala a NFA-ului.
-	Ex:
-	Matricea starilor: [[0], [1, 2], [0, 1], ...]
-	Stari finale NFA: 0, 2
-	Stari finale DFA: [0], [1, 2], deci starile 0, 1 (indecsii listelor
-in matricea starilor corespund numelor starilor DFA-ului)
-	
-	
 
-	
-	
+~ final_states ~
+
+The final states will be states from the matrix of states that contain
+at least one final state of the NFA.
+ex:
+State matrix: [[0], [1, 2], [0, 1], ...]
+NFA finals: 0, 2
+DFA final states: [0], [1, 2], so states 0, 1 list indices
+in the state matrix correspond to the names of the DFA states)
+
