@@ -1,4 +1,4 @@
-# NFA-> DFA conversion (Subset Construction)
+# NFA to DFA conversion (Subset Construction)
 
 ### state_matrix
 
