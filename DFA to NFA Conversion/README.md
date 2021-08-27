@@ -15,7 +15,7 @@ of the states of the DFA
 Eg: [[0], [0, 1, 2], [0, 2], [1, 2] ...] -> [0, 1, 2, 3 ...]
 
 
-* find_next_state ~
+### find_next_state
 
 Starting with state 0 (we will create more and more states according
 to the paths we take), for each symbol in the alphabet, we look for all
@@ -53,14 +53,14 @@ will be formed from the 3 sets and will be part of the state matrix.
 In the absence of relevant transitions in the NFA delta, the final set could be empty.
 Then the transition will lead to a sink_state.
 
-* sink_state ~
+### sink_state
 
 After going through all the states, if we know that there is at least one transition
 that leads to a sink_state, we add this state to the current states (it will be the last
 line of the matrix, so the state with the largest number) and we make the necessary changes
 in delta.
 
-* final_states ~
+### final_states
 
 The final states will be states from the matrix of states that contain
 at least one final state of the NFA.
