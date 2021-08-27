@@ -1,6 +1,6 @@
 # NFA-> DFA conversion (Subset Construction)
 
-### state_matrix ~
+### state_matrix
 
 Because DFA states can correspond to multiple NFA states
 (NFA: on the same symbol we can go on several paths +
